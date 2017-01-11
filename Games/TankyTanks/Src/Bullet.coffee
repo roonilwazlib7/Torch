@@ -8,7 +8,6 @@ class exports.Bullet extends Torch.Sprite
 
         @Bind.Texture( "bullet-silver" )
 
-        @rotationOffset.y = -1 * @rectangle.height
         @rotation = @shooter.barrel.rotation
         if not @rotation? then @rotation = 0
 
@@ -17,11 +16,48 @@ class exports.Bullet extends Torch.Sprite
         vY = Math.sin( rot )
 
         @Body.velocity.Set(vX, vY)
+        @Body.velocity.MultiplyScalar(0.3)
         @position.x -= ( @rectangle.width / 2 )
         @position.y -= ( @rectangle.height / 2 )
 
-        @On "OutOfBounds", =>
-            @Body.velocity.MultiplyScalar(-1)
+
+    Update: ->
+        super()
+        flippedY = false
+        flippedX = false
+        if @position.y < 0
+            dif =  0 - @position.y
+            @position.y = dif
+            flippedY = true
+        if @position.y > @game.Camera.Viewport.height
+            dif = @position.y - @game.Camera.Viewport.height
+            @position.y -= dif
+            flippedY = true
+        if @position.x < 0
+            dif = 0 - @position.x
+            @position.x = dif
+            flippedX = true
+        if @position.x > @game.Camera.Viewport.width
+            dif = @position.x - @game.Camera.Viewport.width
+            flippedX = true
+
+        if flippedY and flippedX
+            @Flip()
+
+        else if flippedY then @Flip("y")
+        else if flippedX then @Flip("x")
+
+    Flip: (plane = "both")->
+        if plane is "both"
+            @Body.velocity.Reverse()
+        else
+            @Body.velocity[ plane ] *= -1
+
+        @Body.velocity.Resolve()
+        console.log @rotation
+        @rotation = @Body.velocity.angle + Math.PI / 2
+        console.log @rotation
+
 
 
     @Load: (game) ->

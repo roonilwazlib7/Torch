@@ -6103,7 +6103,10 @@ TorchModule class Vector
 
     ResolveVectorProperties: ->
         @magnitude = Math.sqrt( @x * @x + @y * @y )
-        @angle = Math.atan2(@x, @y)
+        @angle = Math.atan2(@y, @x)
+
+    Resolve: ->
+        @ResolveVectorProperties()
 
     Clone: ->
         return new Vector(@x, @y)
@@ -6143,6 +6146,9 @@ TorchModule class Vector
 
     DotProduct: (v) ->
         return @x * v.x + @y * v.y
+
+    Reverse: ->
+        @MultiplyScalar( -1 )
 
     IsPerpendicular: (v) ->
         return @DotProduct(v) is 0
@@ -6263,4 +6269,4 @@ class Torch
 exports.Torch = new Torch()
 
 
-Torch::version = '0.9.137'
+Torch::version = '0.9.162'
