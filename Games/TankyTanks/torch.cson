@@ -1,0 +1,16 @@
+bundle: false
+compress: false
+run: true
+electron: true
+
+coffeeSources: [
+]
+
+files:
+    [
+        "torch.js"
+        "Core/Controller.js"
+        "Core/Tank.js"
+        "Core/Bullet.js"
+        "Core/Game.js"
+    ]

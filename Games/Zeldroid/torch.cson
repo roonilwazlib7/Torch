@@ -1,0 +1,22 @@
+bundle: false
+compress: false
+run: false
+electron: true
+
+coffeeSources: [
+    "MapMaker"
+]
+
+files:
+    [
+        "torch.js"
+        "Core/Projectiles/PlayerBullet.js"
+        "Core/Player.js"
+        "Core/HUD.js"
+        "Core/PauseMenu.js"
+        "Core/StateMachines/BasicFollow.js"
+        "Core/MapPieces/MapPiece.js"
+        "Core/MapPieces/Enemies/Enemy.js"
+        "Core/MapManager.js"
+        "Core/Game.js"
+    ]

@@ -1,0 +1,45 @@
+.cell{
+    border: 1px solid black;
+    width: 64px;
+    height: 64px;
+    cursor: pointer;
+
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+    user-select: none; /* Non-prefixed version, currently
+                                not supported by any browser */
+}
+.cell:hover{
+    background-color: green;
+}
+
+#menu{
+    width: 500px;
+    min-height: 500px;
+    background-color: white;
+    border: 1px solid;
+    position: absolute;
+    top: 0;
+    padding: 2%;
+}
+
+.option {
+    width: 80px;
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 1%;
+    display: inline-block;
+    margin-left: 1%;
+    height: 90px;
+}
+.option img, .placed-peice{
+    width: 64px;
+    height: 64px;
+
+    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+    image-rendering: -moz-crisp-edges;          /* Firefox                        */
+    image-rendering: -o-crisp-edges;            /* Opera                          */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+    image-rendering: pixelated; /* Chrome */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+}

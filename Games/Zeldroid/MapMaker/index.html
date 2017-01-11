@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+        <script src = "jquery-3.1.1.min.js"></script>
+        <script src = "jquery-ui.min.js"></script>
+
+        <script src = "../../../Builds/torch-latest.js"></script>
+        <script src = "../Core/MapPieces/MapPiece.js"></script>
+        <script src = "../Core/MapPieces/Enemies/Enemy.js"></script>
+        <script src = "../Core/MapManager.js"></script>
+
+        <script src = "Core/MapMaker.js"></script>
+        <script>if (window.module) module = window.module;</script>
+
+        <link rel = "stylesheet" href = "bootstrap.min.css" />
+        <link rel = "stylesheet" href = "main.css" />
+    </head>
+
+    <body>
+        <div id="grid"></div>
+
+        <div id = "menu">
+            <div class="row">
+                <div class="col-sm-4" style="float:right">
+                    <button class="btn btn-default" id = "minimize-button">
+                        <span class="glyphicon glyphicon-minus"></span>
+                    </button
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <h1>Menu</h1>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <label> Map Name </label><br>
+                    <input id = "map-name" class="form-control" placeholder="New Map"/>
+                </div>
+                <div class="col-sm-6">
+                    <label> Author </label><br>
+                    <input id = "map-author" class="form-control" placeholder="Crew"/>
+                </div>
+            </div>
+
+            <div class="row" id = "action-options">
+                <h1>Action</h1>
+                <div class="col-sm-6">
+                    <label>Place</label>
+                    <input type="radio" name="action-select" value="place" checked>
+                </div>
+                <div class="col-sm-6">
+                    <label>Erase</label>
+                    <input type="radio" name="action-select" value="erase">
+                </div>
+            </div>
+
+            <div class="row" id = "map-options" style="margin-top: 2%">
+                <h1> Map Pieces </h1>
+            </div>
+
+            <div class="row" style="margin-top: 2%">
+                <div class="col-sm-6">
+                    <button type="button" class="btn btn-primary center-block" id = "map-export"> Export Map </button>
+                </div>
+                <div class="col-sm-6">
+                    <button type="button" class="btn btn-primary center-block" id = "map-import"> Import Map </button>
+                </div>
+            </div>
+
+        </div>
+    </body>
+</html>

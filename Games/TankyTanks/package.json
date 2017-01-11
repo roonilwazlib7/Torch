@@ -1,0 +1,16 @@
+{
+    "name": "TankyTanks",
+    "author": "OffAndOnGames",
+    "license": "ISC",
+    "description": "",
+    "version": "0.0.0",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron main.js"
+    },
+    "GameConfig": {
+        "Build": 234,
+        "BuildMinor": 0,
+        "BuildMajor": 0
+    }
+}

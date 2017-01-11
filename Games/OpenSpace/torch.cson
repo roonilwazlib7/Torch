@@ -1,0 +1,23 @@
+bundle: false
+compress: false
+run: false
+electron: true
+
+coffeeSources: [
+]
+
+files:
+    [
+        "torch.js"
+        "Core/Player.js"
+        "Core/Projectile.js"
+        "Core/Powerup.js"
+        "Core/Enemy.js"
+        "Core/EnemyGenerator.js"
+        "Core/MotherShip.js"
+        "Core/MainMenu.js"
+        "Core/HUD.js"
+        "Core/EffectGenerator.js"
+        "Core/Background.js"
+        "Core/Game.js"
+    ]

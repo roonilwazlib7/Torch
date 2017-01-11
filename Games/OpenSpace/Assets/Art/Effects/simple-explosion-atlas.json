@@ -1,0 +1,58 @@
+{
+    "textures": {
+        "simpleExplosion00": {
+            "x": "0",
+            "y": "0",
+            "width": "186",
+            "height": "186"
+        },
+        "simpleExplosion01": {
+            "x": "155",
+            "y": "345",
+            "width": "152",
+            "height": "150"
+        },
+        "simpleExplosion02": {
+            "x": "307",
+            "y": "357",
+            "width": "90",
+            "height": "91"
+        },
+        "simpleExplosion03": {
+            "x": "307",
+            "y": "260",
+            "width": "97",
+            "height": "97"
+        },
+        "simpleExplosion04": {
+            "x": "302",
+            "y": "135",
+            "width": "125",
+            "height": "125"
+        },
+        "simpleExplosion05": {
+            "x": "186",
+            "y": "0",
+            "width": "135",
+            "height": "135"
+        },
+        "simpleExplosion06": {
+            "x": "159",
+            "y": "186",
+            "width": "143",
+            "height": "143"
+        },
+        "simpleExplosion07": {
+            "x": "0",
+            "y": "345",
+            "width": "155",
+            "height": "154"
+        },
+        "simpleExplosion08": {
+            "x": "0",
+            "y": "186",
+            "width": "159",
+            "height": "159"
+        }
+    }
+}

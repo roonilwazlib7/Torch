@@ -1,0 +1,9 @@
+#we don't want node stuff
+node_modules
+_tmp.bat
+_tmp.sh
+_tmp_index.html
+torch-error.log
+
+# we also can't have huge videos
+*.mp4
