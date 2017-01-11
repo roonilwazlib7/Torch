@@ -52,19 +52,22 @@ class exports.GamePadController_Xbox360 extends Controller
     UpdateMovement: ->
         buttons = @gamePad.buttons
         sticks = @gamePad.sticks
+        rotation = @tank.rotation
+
         @tank.Body.velocity.Set( sticks.LeftStick.horizontalAxis, sticks.LeftStick.verticalAxis )
         @tank.Body.velocity.MultiplyScalar( @tank.moveSpeed )
 
-        @tank.rotation = -@tank.Body.velocity.angle
+        if @tank.Body.velocity.magnitude > 0
+            rotation = @tank.Body.velocity.angle + Math.PI / 2
+
+        @tank.rotation = rotation
 
     UpdateBarrel: ->
-        rotation = @rotation
+        rotation = @tank.barrel.rotation
 
         if Math.abs(@gamePad.sticks.RightStick.verticalAxis) > 0 or Math.abs(@gamePad.sticks.RightStick.horizontalAxis) > 0
             rotation = Math.atan2( @gamePad.sticks.RightStick.verticalAxis, @gamePad.sticks.RightStick.horizontalAxis )
             rotation += Math.PI / 2
-        else
-            window.kl = true
 
         @tank.barrel.rotation = rotation
 

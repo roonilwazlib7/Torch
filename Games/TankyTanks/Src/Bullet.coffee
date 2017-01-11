@@ -54,9 +54,7 @@ class exports.Bullet extends Torch.Sprite
             @Body.velocity[ plane ] *= -1
 
         @Body.velocity.Resolve()
-        console.log @rotation
         @rotation = @Body.velocity.angle + Math.PI / 2
-        console.log @rotation
 
 
 
