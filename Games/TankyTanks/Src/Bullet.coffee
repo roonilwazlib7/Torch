@@ -2,13 +2,15 @@ exports = this
 
 class exports.Bullet extends Torch.Sprite
     shooter: null # the tank that shot the bullet
-    shootDist: 100
+    bounces: 2    # how many times the bullet is allowed to bounce
     constructor: ( @shooter ) ->
         super( @shooter.game, @shooter.barrel.shootPoint.position.x, @shooter.barrel.shootPoint.position.y )
 
         @Bind.Texture( "bullet-silver" )
 
         @rotation = @shooter.barrel.rotation
+        @drawIndex = @shooter.drawIndex - 1
+
         if not @rotation? then @rotation = 0
 
         rot = @rotation - Math.PI / 2
@@ -48,6 +50,11 @@ class exports.Bullet extends Torch.Sprite
         else if flippedX then @Flip("x")
 
     Flip: (plane = "both")->
+        @bounces -= 1
+        if @bounces <= 0
+            @Trash()
+            return
+
         if plane is "both"
             @Body.velocity.Reverse()
         else

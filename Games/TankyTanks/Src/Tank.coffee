@@ -35,14 +35,14 @@ class exports.Tank extends Torch.Sprite
         b = new Bullet( @ )
 
 class Barrel extends Torch.Sprite
-    shootDist: 100
+    shootDist: 100          # how far away from the tank's center we're shooting
     constructor: (@tank) ->
         super( @tank.game, @tank.position.x, @tank.position.y )
         @Bind.Texture( "tank-barrel-green" )
 
         @rotationOffset.y = -1 * @rectangle.height / 4
         @shootPoint = new Torch.Shapes.Circle(@game, 0, 0, 5, "green", "green")
-        @shootDist = @rectangle.width * 2.5
+        @shootDist = @rectangle.width * 3
 
     Update: ->
         super()
