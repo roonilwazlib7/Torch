@@ -8,6 +8,10 @@ Documentation: http://www.roonilwazlib7.github.io/torchjsdocs
 
 Documentation: https://roonilwazlib7.github.io/torchjsdocs/
 
+Torch uses a few 3rd party libraries:
+* SAT.js (https://github.com/jriecken/sat-js) for detecting collisions using the Separating Axis Theorem
+* PathFinding.js (https://github.com/qiao/PathFinding.js/) for Path Finding
+
 ## Source
 Torch.js is written in coffee script and can be found in the <b>Src/</b> folder
 
@@ -22,23 +26,3 @@ A node app that puts the source together
 
 ### Project.js
 A node app that can be used to set up a new Torch.js project
-
-## Prerequisites
-(for building the source and making electron games)
-
-* node js
-    * Packages:
-        * node-minify
-        * electron
-        * shelljs
-* coffeescript
-
-### basically, follow these commands: (linux)
-curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-npm install -g coffee-script
-
-(switch to Tools/Build) npm install
-
-(switch to current game) npm install
