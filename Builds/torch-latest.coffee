@@ -4095,6 +4095,35 @@ class CanvasRenderer
         canvas.translate(transFormX, transFormY)
         canvas.rotate(@sprite.rotation)
 
+class CloneManager
+    sprite: null # the sprite to be cloned
+
+    constructor: (@sprite) ->
+
+    _defaultClone: (keepGame) ->
+        clone = {}
+        for key,value of @sprite
+            continue if key is "game"
+
+            if Util.Type( value ) is "object"
+                value = Object.create( value )
+
+            clone[ key ] = value
+
+        @sprite.game.Add( clone ) if keepGame
+        return clone
+
+    WithConstructor: (args...) ->
+        if not @sprite.constructor?
+            throw new Error("Unable to clone with constructor: sprite has no constructor")
+
+        SpriteConstructor = @sprite.constructor
+
+        return new SpriteConstructor( args... )
+
+    WithGame: (keepGame = false) ->
+        return @_defaultClone(keepGame)
+
 TorchModule class Sprite extends GameThing
     Sprite.MixIn(EventDispatcher)
 
@@ -4137,6 +4166,7 @@ TorchModule class Sprite extends GameThing
         @States = new StateMachineManager(@)
         @Grid = new GridManager(@)
         @Animations = new AnimationManager(@)
+        @Clone = new CloneManager(@)
 
         @texture = null
         @video = null
@@ -6269,4 +6299,4 @@ class Torch
 exports.Torch = new Torch()
 
 
-Torch::version = '0.9.170'
+Torch::version = '0.9.178'

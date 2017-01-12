@@ -40,6 +40,7 @@ TorchModule class Sprite extends GameThing
         @States = new StateMachineManager(@)
         @Grid = new GridManager(@)
         @Animations = new AnimationManager(@)
+        @Clone = new CloneManager(@)
 
         @texture = null
         @video = null

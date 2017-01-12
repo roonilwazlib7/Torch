@@ -1,4 +1,4 @@
-Build: 170
+Build: 178
 BuildMinor: 9
 BuildMajor: 0
 Files: [
@@ -26,6 +26,7 @@ Files: [
     "Sprite/Components/AnimationManager"
     "Sprite/Components/BindManager"
     "Sprite/Components/CanvasRenderer"
+    "Sprite/Components/CloneManager"
     "Sprite/Sprite"
     "Sprite/Text"
     "Sprite/Shapes"

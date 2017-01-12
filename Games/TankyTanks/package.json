@@ -9,7 +9,7 @@
         "start": "electron main.js"
     },
     "GameConfig": {
-        "Build": 274,
+        "Build": 282,
         "BuildMinor": 0,
         "BuildMajor": 0
     }
