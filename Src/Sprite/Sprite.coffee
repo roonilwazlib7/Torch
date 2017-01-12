@@ -59,6 +59,8 @@ TorchModule class Sprite extends GameThing
         @events = {}
         @renderer = new CanvasRenderer(@)
 
+        @exportValues = []
+
         game.Add(@)
 
     UpdateSprite: ->
@@ -123,3 +125,6 @@ TorchModule class Sprite extends GameThing
     Pause: (shouldPause = true) ->
         # prevents the sprite from updating
         @paused = shouldPause
+
+    Export: (attribsToExport...) ->
+        @exportValues = attribsToExport

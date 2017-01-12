@@ -17,6 +17,7 @@ Init = (game) ->
         color: "black"
         fontSize: 18
         font: "monospace"
+    game.debugConsole = new Torch.DebugConsole(game)
 
 
 Draw = (game)->

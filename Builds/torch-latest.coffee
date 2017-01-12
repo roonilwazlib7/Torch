@@ -671,12 +671,10 @@ TorchModule class DebugConsole
             @console.style.display = "block"
             @consoleInput.focus()
             @enabled = true
-            Util.Array(@game.things).All (thing) -> if thing.Pause then thing.Pause()
         else
             @console.style.display = "none"
             @consoleInput.value = ""
             @enabled = false
-            Util.Array(@game.things).All (thing) -> if thing.Pause then thing.Pause(false)
 
     Output: (content, color = "white") ->
         content = content.replace(/\n/g, "<br>")
@@ -756,6 +754,26 @@ TorchModule class DebugConsole
                 tConsole.Output("Statment Executed", "green")
             catch error
                 tConsole.Output("Statement: '#{statement}' caused an error. #{error}", "red")
+
+        @AddCommand "EXP-S", (tConsole, type) =>
+            json = {sprites: []}
+            for thing in @game.things
+                if thing.torch_type is "Sprite"
+                    continue if thing.exportValues is false
+
+                    exportedSprite = {}
+
+                    if type is "c"
+                        exportedSprite.constructor = thing.constructor.name
+                        exportedSprite.x = thing.position.x
+                        exportedSprite.y = thing.position.y
+
+                        for val in thing.exportValues
+                            exportedSprite[ val ] = thing[ val ]
+
+                    json.sprites.push( exportedSprite )
+
+            console.log JSON.stringify( json, null, 4 )
 
 temp = null
 if this[ "PF" ] then temp = this[ "PF" ]
@@ -4185,6 +4203,8 @@ TorchModule class Sprite extends GameThing
         @events = {}
         @renderer = new CanvasRenderer(@)
 
+        @exportValues = []
+
         game.Add(@)
 
     UpdateSprite: ->
@@ -4249,6 +4269,9 @@ TorchModule class Sprite extends GameThing
     Pause: (shouldPause = true) ->
         # prevents the sprite from updating
         @paused = shouldPause
+
+    Export: (attribsToExport...) ->
+        @exportValues = attribsToExport
 
 if document?
     _measureCanvas = document.createElement("CANVAS")
@@ -6299,4 +6322,4 @@ class Torch
 exports.Torch = new Torch()
 
 
-Torch::version = '0.9.178'
+Torch::version = '0.9.186'
