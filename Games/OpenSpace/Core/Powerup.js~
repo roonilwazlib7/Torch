@@ -35,7 +35,7 @@
       game.Load.Texture("Assets/Art/PNG/Power-ups/powerupGreen_bolt.png", "powerup-battery");
       game.Load.Texture("Assets/Art/PNG/Power-ups/powerupGreen_shield.png", "powerup-shield");
       game.Load.Texture("Assets/Art/PNG/Power-ups/pill_green.png", "powerup-life");
-      return game.Load.Texture("Assets/Art/PNG/Power-ups/powerupRed_star.png", "powerup-laser");
+      return game.Load.Texture("Assets/Art/PNG/Power-ups/PowerupRed_star.png", "powerup-laser");
     };
 
     Powerup.prototype.ApplyEffect = function(player) {
