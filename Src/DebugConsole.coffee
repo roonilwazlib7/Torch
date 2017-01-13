@@ -148,3 +148,19 @@ TorchModule class DebugConsole
                     json.sprites.push( exportedSprite )
 
             console.log JSON.stringify( json, null, 4 )
+
+        @AddCommand "IMP-S", (tConsole, jsonFileId) =>
+            json = @game.Assets.GetFile(jsonFileId)
+
+            json = JSON.parse( json )
+
+            importedSprites = for sprite in json.sprites
+                s = new window[sprite.constructor]( @game, sprite.x, sprite.y )
+                for key,value of sprite
+                    continue if key is "constructor" or key is "x" or key is "y"
+
+                    s[ key ] = value
+
+                sprite
+
+            return importedSprites
