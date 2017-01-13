@@ -1,12 +1,21 @@
 TorchModule class Rectangle
+    x: 0
+    y: 0
+    width: 0
+    height: 0
     constructor: (@x, @y, @width, @height) ->
-        @z = 0
+
+    HalfWidth: -> return @width / 2
+
+    HalfHeight: -> return @height / 2
 
     GetOffset: (rectangle) ->
-        vx = ( @x + ( @width / 2 ) ) - ( rectangle.x + ( rectangle.width / 2 ) )
-        vy = ( @y + (@height / 2 ) ) - ( rectangle.y + ( rectangle.height / 2 ) )
-        halfWidths = (@width / 2) + (rectangle.width / 2)
-        halfHeights = (@height / 2) + (rectangle.height / 2)
+        vx = ( @x + @HalfWidth() ) - ( rectangle.x + rectangle.HalfWidth() )
+        vy = ( @y + @HalfHeight() ) - ( rectangle.y + rectangle.HalfHeight() )
+
+        halfWidths = @HalfWidth() + rectangle.HalfWidth()
+        halfHeights = @HalfHeight() + rectangle.HalfHeight()
+        
         sharedXPlane = (@x + @width) - (rectangle.x + rectangle.width)
         sharedYPlane = (@y + @height) - (rectangle.y + rectangle.height)
 
@@ -31,18 +40,6 @@ TorchModule class Rectangle
         else
             return false
 
-    ShiftFrom: (rectangle, transX, transY) ->
-        x = null
-        y = null
-
-        if transX is undefined then x = rectangle.x
-        else x = rectangle.x + transX
-
-        if transY is undefined then y = rectangle.y
-        else y = rectangle.y + transY
-
-        @x = x
-        @y = y
 
 TorchModule class Vector
     x: 0
