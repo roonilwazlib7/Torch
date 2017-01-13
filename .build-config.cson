@@ -47,6 +47,7 @@ Files: [
     "Game/Components/HookManager"
     "Game/Components/GameThingFactory"
     "Game/Components/GamePadManager"
+    "Game/Components/CastManager"
     "Game/CanvasGame"
     "Game/Game"
     "Wrappers/Texture"

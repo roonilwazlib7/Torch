@@ -1,4 +1,4 @@
-SpriteQuery = Util.Enum("RayCast", "CircleCast", "PolygonCast")
+SpriteQuery = Util.Enum("RayCast", "CircleCast", "PolygonCast", "RectangleCast")
 class EventManager
     mouseOver: false
     clickTrigger: false
@@ -9,7 +9,7 @@ class EventManager
     constructor: (@sprite) ->
         @game = @sprite.game
 
-        @On "SpriteQuery", (event) =>
+        @game.On "SpriteQuery", (event) =>
             @HandleQuery( event )
 
     Update: ->
@@ -61,13 +61,20 @@ class EventManager
             @clickAwayTrigger = true
 
     HandleQuery: (event) ->
+        res = null
         switch event.query
 
             when SpriteQuery.RayCast
-                @sprite.Collisions.RayCast( @, event.ray, event.results )
+                res = @sprite.Collisions.RayCast(event.ray, event.limit )
 
             when SpriteQuery.CircleCast
-                @sprite.Collisions.CircleCast( @, event.circle, event.results )
+                res = @sprite.Collisions.CircleCast(event.circle, event.limit )
 
             when SpriteQuery.PolygonCast
-                @sprite.Collisions.PolygonCast( @, event.polygon, event.results )
+                res = @sprite.Collisions.PolygonCast(event.polygon, event.limit )
+
+            when SpriteQuery.RectangleCast
+                res = @sprite.Collisions.RectangleCast(event.rectangle, event.limit )
+
+        if res? and res.collided
+            event.results.push( res )
