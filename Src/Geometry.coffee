@@ -85,9 +85,13 @@ TorchModule class Polygon
     sides: null
 
     constructor: (@points) ->
+        @sides = []
         @Resolve()
 
+    GetPoints: -> return @points
+
     Resolve: ->
+        @points = @GetPoints()
         sides = []
 
         len = @points.length
@@ -104,12 +108,21 @@ TorchModule class Polygon
 
         @sides = sides
 
-TorchModule class Rectangle
+TorchModule class Rectangle extends Polygon
     x: 0
     y: 0
     width: 0
     height: 0
     constructor: (@x, @y, @width, @height) ->
+        super( [] )
+
+    GetPoints: ->
+        points = []
+        points.push new Vector( @x, @y )
+        points.push new Vector( @x + @width, @y )
+        points.push new Vector( @x + @width, @y + @height )
+        points.push new Vector( @x, @y + @height )
+        return points
 
     HalfWidth: -> return @width / 2
 
