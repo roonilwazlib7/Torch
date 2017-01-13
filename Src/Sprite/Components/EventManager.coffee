@@ -1,3 +1,4 @@
+SpriteQuery = Util.Enum("RayCast", "CircleCast", "PolygonCast")
 class EventManager
     mouseOver: false
     clickTrigger: false
@@ -7,6 +8,9 @@ class EventManager
 
     constructor: (@sprite) ->
         @game = @sprite.game
+
+        @On "SpriteQuery", (event) =>
+            @HandleQuery( event )
 
     Update: ->
         if not @game.Mouse.GetRectangle().Intersects(@sprite.rectangle) and @mouseOver
@@ -55,3 +59,15 @@ class EventManager
 
         else if @game.Mouse.down and not @mouseOver
             @clickAwayTrigger = true
+
+    HandleQuery: (event) ->
+        switch event.query
+
+            when SpriteQuery.RayCast
+                @sprite.Collisions.RayCast( @, event.ray, event.results )
+
+            when SpriteQuery.CircleCast
+                @sprite.Collisions.CircleCast( @, event.circle, event.results )
+
+            when SpriteQuery.PolygonCast
+                @sprite.Collisions.PolygonCast( @, event.polygon, event.results )
