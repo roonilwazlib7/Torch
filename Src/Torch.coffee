@@ -1,6 +1,3 @@
-exports = this # this will either be 'window' for Chrome or
-               # 'module' for node
-
 ###
     A few notes to keep in mind:
 

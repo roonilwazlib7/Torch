@@ -3,9 +3,18 @@ GLOBAL_CONTEXT = exports = this
 
 # this is the first file, so any special containers should be declared here
 TorchModules = [] # public pieces of torch, i.e Torch.Sprite, Torch.Game
-TorchModule = (mod, optionalName) ->
-    name = mod.name
-    if optionalName?
-        name = optionalName
+SpriteModules = [] # componenets used by sprites
+GameModules = [] # componenets used by games
 
-    TorchModules.push({name: name, mod: mod})
+ModuleFactory = (container) ->
+
+    return ( mod, optionalName ) ->
+        name = mod.name
+
+        if optionalName?
+            name = optionalName
+
+        container.push( {name: name, mod: mod} )
+
+TorchModule = ModuleFactory( TorchModules )
+SpriteModule = ModuleFactory( SpriteModules )
