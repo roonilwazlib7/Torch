@@ -86,6 +86,13 @@ TorchModule class Line
 
     constructor: (@startPoint, @endPoint) ->
 
+TorchModule class Circle
+    radius: 0
+    x: 0
+    y: 0
+
+    constructor: (@radius, @x, @y) ->
+
 TorchModule class Polygon
     points: null
     sides: null
