@@ -125,32 +125,3 @@ TorchModule class Vector
 
     IsSameDirection: (v) ->
         return @DotProduct(v) > 0
-
-TorchModule class Point
-    constructor: (@x, @y, @z = 0) ->
-
-    Apply: (point) ->
-        @x += point.x
-        @y += point.y
-
-    Subtract: (p) ->
-        return new Point( p.x - @x, p.y - @y )
-
-    Clone: ->
-        return new Point(@x, @y)
-
-    @GetCenterPoint: (points) ->
-        maxX = 0
-        maxY = 0
-
-        minY = Infinity
-        minX = Infinity
-
-        for point in points
-            if point.x > maxX then maxX = point.x
-            if point.y > maxY then maxY = point.y
-
-            if point.x < minX then minX = point.x
-            if point.y < minY then minY = point.y
-
-        return new Point( (maxX - minX) * 0.5, ( maxY - minY) * 0.5)
