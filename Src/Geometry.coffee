@@ -80,6 +80,12 @@ TorchModule class Vector
     IsSameDirection: (v) ->
         return @DotProduct(v) > 0
 
+TorchModule class Line
+    startPoint: null
+    endPoint: null
+
+    constructor: (@startPoint, @endPoint) ->
+
 TorchModule class Polygon
     points: null
     sides: null
