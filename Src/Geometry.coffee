@@ -45,63 +45,80 @@ TorchModule class Rectangle
         @y = y
 
 TorchModule class Vector
-    #__torch__: Torch.Types.Vector
-    x: null
-    y: null
-    angle: null
-    magnitude: null
+    x: 0
+    y: 0
+    angle: 0
+    magnitude: 0
 
     constructor: (@x, @y) ->
-        @ResolveVectorProperties()
+        @Resolve()
 
-    ResolveVectorProperties: ->
+    Resolve: ->
         @magnitude = Math.sqrt( @x * @x + @y * @y )
         @angle = Math.atan2(@y, @x)
 
-    Resolve: ->
-        @ResolveVectorProperties()
+        return @ # allow chaining
 
     Clone: ->
         return new Vector(@x, @y)
 
+    X: (x) ->
+        xType = Util.Type(x)
+        throw new Error("argument 'x' must be a number, got #{xType}") if xType isnt "number"
+
+        @x = x
+        @Resolve()
+
+    Y: (y) ->
+        yType = Util.Type(y)
+        throw new Error("argument 'y' must be a number, got #{yType}") if yType isnt "number"
+
+        @y = y
+        @Resolve()
+
     Set: (x,y) ->
         @x = x
         @y = y
-        @ResolveVectorProperties()
+        @Resolve()
 
     AddScalar: (n) ->
         @x += n
         @y += n
-        @ResolveVectorProperties()
+        @Resolve()
 
     MultiplyScalar: (n) ->
         @x *= n
         @y *= n
-        @ResolveVectorProperties()
+        @Resolve()
 
     DivideScalar: (n) ->
         @x /= n
         @y /= n
-        @ResolveVectorProperties()
+        @Resolve()
 
     SubtractVector: (v) ->
         @x -= v.x
         @y -= v.y
-        @ResolveVectorProperties()
+        @Resolve()
 
     AddVector: (v) ->
         @x += v.x
         @y += v.y
-        @ResolveVectorProperties()
-
-    Normalize: ->
-        @DivideScalar(@magnitude)
-
-    DotProduct: (v) ->
-        return @x * v.x + @y * v.y
+        @Resolve()
 
     Reverse: ->
         @MultiplyScalar( -1 )
+        @Resolve()
+
+    Normalize: (preResolve = false)->
+        @Resolve() if preResolve
+
+        @DivideScalar(@magnitude)
+
+        return @
+
+    DotProduct: (v) ->
+        return @x * v.x + @y * v.y
 
     IsPerpendicular: (v) ->
         return @DotProduct(v) is 0

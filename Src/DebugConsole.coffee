@@ -155,7 +155,7 @@ TorchModule class DebugConsole
             json = JSON.parse( json )
 
             importedSprites = for sprite in json.sprites
-                s = new window[sprite.constructor]( @game, sprite.x, sprite.y )
+                s = new GLOBAL_CONTEXT[sprite.constructor]( @game, sprite.x, sprite.y )
                 for key,value of sprite
                     continue if key is "constructor" or key is "x" or key is "y"
 
