@@ -1,5 +1,5 @@
 # Stuff used throughout Torch
-
+GLOBAL_CONTEXT = exports = this
 # this is the first file, so any special containers should be declared here
 TorchModules = [] # public pieces of torch, i.e Torch.Sprite, Torch.Game
 TorchModule = (mod, optionalName) ->
