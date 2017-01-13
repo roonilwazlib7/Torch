@@ -18,3 +18,4 @@ ModuleFactory = (container) ->
 
 TorchModule = ModuleFactory( TorchModules )
 SpriteModule = ModuleFactory( SpriteModules )
+GameModules = ModuleFactory( GameModules )

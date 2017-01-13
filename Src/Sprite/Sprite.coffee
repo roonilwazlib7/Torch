@@ -24,6 +24,7 @@ TorchModule class Sprite extends GameThing
             throw new ER.ArgumentError("y", y, ["number"])
 
         @InitEventDispatch()
+        @InitModules()
 
         @game = game
 
@@ -84,6 +85,10 @@ TorchModule class Sprite extends GameThing
 
     Draw: ->
         @renderer.Draw()
+
+    InitModules: ->
+        for mod in SpriteModules
+            @[ mod.name ] = new mod.mod( @ )
 
     NotSelf: (otherSprite) ->
         return (otherSprite.torch_uid isnt @torch_uid)
