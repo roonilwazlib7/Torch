@@ -1,3 +1,25 @@
+# The First file in the Torch build chain
+GLOBAL_CONTEXT = exports = this
+
+# this is the first file, so any special containers should be declared here
+TorchModules = [] # public pieces of torch, i.e Torch.Sprite, Torch.Game
+SpriteModules = [] # componenets used by sprites
+GameModules = [] # componenets used by games
+
+ModuleFactory = (container) ->
+
+    return ( mod, optionalName ) ->
+        name = mod.name
+
+        if optionalName?
+            name = optionalName
+
+        container.push( {name: name, mod: mod} )
+
+TorchModule = ModuleFactory( TorchModules )
+SpriteModule = ModuleFactory( SpriteModules )
+GameModules = ModuleFactory( GameModules )
+
 # errors
 ER = {}
 
@@ -435,17 +457,6 @@ class RandomPool
         @choices = Util.Array( @choices ).Shuffle()
         return @choices[0]
 
-# Stuff used throughout Torch
-
-# this is the first file, so any special containers should be declared here
-TorchModules = [] # public pieces of torch, i.e Torch.Sprite, Torch.Game
-TorchModule = (mod, optionalName) ->
-    name = mod.name
-    if optionalName?
-        name = optionalName
-
-    TorchModules.push({name: name, mod: mod})
-
 class Utilities
     constructor: ->
         @Math = new MathUtility()
@@ -774,6 +785,22 @@ TorchModule class DebugConsole
                     json.sprites.push( exportedSprite )
 
             console.log JSON.stringify( json, null, 4 )
+
+        @AddCommand "IMP-S", (tConsole, jsonFileId) =>
+            json = @game.Assets.GetFile(jsonFileId)
+
+            json = JSON.parse( json )
+
+            importedSprites = for sprite in json.sprites
+                s = new GLOBAL_CONTEXT[sprite.constructor]( @game, sprite.x, sprite.y )
+                for key,value of sprite
+                    continue if key is "constructor" or key is "x" or key is "y"
+
+                    s[ key ] = value
+
+                sprite
+
+            return importedSprites
 
 temp = null
 if this[ "PF" ] then temp = this[ "PF" ]
@@ -4966,6 +4993,7 @@ TorchModule class Sprite extends GameThing
             throw new ER.ArgumentError("y", y, ["number"])
 
         @InitEventDispatch()
+        @InitModules()
 
         @game = game
 
@@ -5026,6 +5054,10 @@ TorchModule class Sprite extends GameThing
 
     Draw: ->
         @renderer.Draw()
+
+    InitModules: ->
+        for mod in SpriteModules
+            @[ mod.name ] = new mod.mod( @ )
 
     NotSelf: (otherSprite) ->
         return (otherSprite.torch_uid isnt @torch_uid)
@@ -6896,15 +6928,156 @@ Color.Blue = new Color(0, 0, 256, 1)
 Color.Flame = new Color("ff8000")
 Color.Ruby = new Color("e60000")
 
-TorchModule class Rectangle
+TorchModule class Vector
+    x: 0
+    y: 0
+    angle: 0
+    magnitude: 0
+
+    constructor: (@x, @y) ->
+        @Resolve()
+
+    Resolve: ->
+        @magnitude = Math.sqrt( @x * @x + @y * @y )
+        @angle = Math.atan2(@y, @x)
+
+        return @ # allow chaining
+
+    Clone: ->
+        return new Vector(@x, @y)
+
+    X: (x) ->
+        xType = Util.Type(x)
+        throw new Error("argument 'x' must be a number, got #{xType}") if xType isnt "number"
+
+        @x = x
+        @Resolve()
+
+    Y: (y) ->
+        yType = Util.Type(y)
+        throw new Error("argument 'y' must be a number, got #{yType}") if yType isnt "number"
+
+        @y = y
+        @Resolve()
+
+    Set: (x,y) ->
+        @x = x
+        @y = y
+        @Resolve()
+
+    AddScalar: (n) ->
+        @x += n
+        @y += n
+        @Resolve()
+
+    MultiplyScalar: (n) ->
+        @x *= n
+        @y *= n
+        @Resolve()
+
+    DivideScalar: (n) ->
+        @x /= n
+        @y /= n
+        @Resolve()
+
+    SubtractVector: (v) ->
+        @x -= v.x
+        @y -= v.y
+        @Resolve()
+
+    AddVector: (v) ->
+        @x += v.x
+        @y += v.y
+        @Resolve()
+
+    Reverse: ->
+        @MultiplyScalar( -1 )
+        @Resolve()
+
+    Normalize: (preResolve = false)->
+        @Resolve() if preResolve
+
+        @DivideScalar(@magnitude)
+
+        return @
+
+    DotProduct: (v) ->
+        return @x * v.x + @y * v.y
+
+    IsPerpendicular: (v) ->
+        return @DotProduct(v) is 0
+
+    IsSameDirection: (v) ->
+        return @DotProduct(v) > 0
+
+TorchModule class Line
+    startPoint: null
+    endPoint: null
+
+    constructor: (@startPoint, @endPoint) ->
+
+TorchModule class Circle
+    radius: 0
+    x: 0
+    y: 0
+
+    constructor: (@radius, @x, @y) ->
+
+TorchModule class Polygon
+    points: null
+    sides: null
+
+    constructor: (@points) ->
+        @sides = []
+        @Resolve()
+
+    GetPoints: -> return @points
+
+    Resolve: ->
+        @points = @GetPoints()
+        sides = []
+
+        len = @points.length
+
+        while len > 0
+            len -= 1
+
+            p = @points[ len ]
+
+            if len isnt 0
+                sides.push( new Line( p, @points[len - 1] ) )
+            else
+                sides.push( new Line( p, @points[ @points.length - 1 ] ) )
+
+        @sides = sides
+
+TorchModule class Rectangle extends Polygon
+    x: 0
+    y: 0
+    width: 0
+    height: 0
     constructor: (@x, @y, @width, @height) ->
-        @z = 0
+        super( [] )
+
+    GetPoints: ->
+        points = []
+        points.push new Vector( @x, @y )
+        points.push new Vector( @x + @width, @y )
+        points.push new Vector( @x + @width, @y + @height )
+        points.push new Vector( @x, @y + @height )
+        return points
+
+    HalfWidth: -> return @width / 2
+
+    HalfHeight: -> return @height / 2
 
     GetOffset: (rectangle) ->
-        vx = ( @x + ( @width / 2 ) ) - ( rectangle.x + ( rectangle.width / 2 ) )
-        vy = ( @y + (@height / 2 ) ) - ( rectangle.y + ( rectangle.height / 2 ) )
-        halfWidths = (@width / 2) + (rectangle.width / 2)
-        halfHeights = (@height / 2) + (rectangle.height / 2)
+        vx = ( @x + @HalfWidth() ) - ( rectangle.x + rectangle.HalfWidth() )
+        vy = ( @y + @HalfHeight() ) - ( rectangle.y + rectangle.HalfHeight() )
+
+        halfWidths = @HalfWidth() + rectangle.HalfWidth()
+        halfHeights = @HalfHeight() + rectangle.HalfHeight()
+
         sharedXPlane = (@x + @width) - (rectangle.x + rectangle.width)
         sharedYPlane = (@y + @height) - (rectangle.y + rectangle.height)
 
@@ -6928,116 +7101,6 @@ TorchModule class Rectangle
             return a.GetOffset(b)
         else
             return false
-
-    ShiftFrom: (rectangle, transX, transY) ->
-        x = null
-        y = null
-
-        if transX is undefined then x = rectangle.x
-        else x = rectangle.x + transX
-
-        if transY is undefined then y = rectangle.y
-        else y = rectangle.y + transY
-
-        @x = x
-        @y = y
-
-TorchModule class Vector
-    #__torch__: Torch.Types.Vector
-    x: null
-    y: null
-    angle: null
-    magnitude: null
-
-    constructor: (@x, @y) ->
-        @ResolveVectorProperties()
-
-    ResolveVectorProperties: ->
-        @magnitude = Math.sqrt( @x * @x + @y * @y )
-        @angle = Math.atan2(@y, @x)
-
-    Resolve: ->
-        @ResolveVectorProperties()
-
-    Clone: ->
-        return new Vector(@x, @y)
-
-    Set: (x,y) ->
-        @x = x
-        @y = y
-        @ResolveVectorProperties()
-
-    AddScalar: (n) ->
-        @x += n
-        @y += n
-        @ResolveVectorProperties()
-
-    MultiplyScalar: (n) ->
-        @x *= n
-        @y *= n
-        @ResolveVectorProperties()
-
-    DivideScalar: (n) ->
-        @x /= n
-        @y /= n
-        @ResolveVectorProperties()
-
-    SubtractVector: (v) ->
-        @x -= v.x
-        @y -= v.y
-        @ResolveVectorProperties()
-
-    AddVector: (v) ->
-        @x += v.x
-        @y += v.y
-        @ResolveVectorProperties()
-
-    Normalize: ->
-        @DivideScalar(@magnitude)
-
-    DotProduct: (v) ->
-        return @x * v.x + @y * v.y
-
-    Reverse: ->
-        @MultiplyScalar( -1 )
-
-    IsPerpendicular: (v) ->
-        return @DotProduct(v) is 0
-
-    IsSameDirection: (v) ->
-        return @DotProduct(v) > 0
-
-TorchModule class Point
-    constructor: (@x, @y, @z = 0) ->
-
-    Apply: (point) ->
-        @x += point.x
-        @y += point.y
-
-    Subtract: (p) ->
-        return new Point( p.x - @x, p.y - @y )
-
-    Clone: ->
-        return new Point(@x, @y)
-
-    @GetCenterPoint: (points) ->
-        maxX = 0
-        maxY = 0
-
-        minY = Infinity
-        minX = Infinity
-
-        for point in points
-            if point.x > maxX then maxX = point.x
-            if point.y > maxY then maxY = point.y
-
-            if point.x < minX then minX = point.x
-            if point.y < minY then minY = point.y
-
-        return new Point( (maxX - minX) * 0.5, ( maxY - minY) * 0.5)
-
-exports = this # this will either be 'window' for Chrome or
-               # 'module' for node
 
 ###
     A few notes to keep in mind:
@@ -7120,4 +7183,4 @@ class Torch
 exports.Torch = new Torch()
 
 
-Torch::version = '0.9.187'
+Torch::version = '0.9.190'
