@@ -2,7 +2,7 @@ class Camera
     position: null
     _jerkFollow: null
     constructor: (@game) ->
-        @position = new Point(0,0)
+        @position = new Vector(0,0)
         @Viewport = new Viewport(@)
 
     JerkFollow: (sprite, offset = 5, config) ->

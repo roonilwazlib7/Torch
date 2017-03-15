@@ -1,4 +1,4 @@
-Build: 190
+Build: 194
 BuildMinor: 9
 BuildMajor: 0
 Files: [
@@ -17,7 +17,6 @@ Files: [
     "Mixins/Trashable"
     "GameThing"
     "DebugConsole"
-    "External/PathFinding"
     "External/SAT"
     "Sprite/Components/BodyManager"
     "Sprite/Components/SizeManager"
