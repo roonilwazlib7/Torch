@@ -3,6 +3,14 @@ Collision =
     Circle: 2
     SAT: 3
 
+class CollisionDetector
+    AABB: (sprite, otherSprite)->
+        return sprite.rectangle.Intersects(otherSprite.rectangle)
+
+    Circle: ->
+
+    SAT: ->
+
 class CollisionManager
     mode: Collision.AABB
     sprite: null
@@ -13,6 +21,7 @@ class CollisionManager
     constructor: (@sprite) ->
         @filter = {}
         @game = @sprite.game
+        @collisionDetector = new CollisionDetector()
 
     Monitor: ->
         @enabled = true
@@ -80,7 +89,7 @@ class CollisionManager
                     collisionData = {}
                     switch @mode
                         when Collision.AABB
-                            collisionData = @sprite.CollidesWith(otherSprite).AABB()
+                            collisionData = @collisionDetector.AABB( @sprite, otherSprite )
                             collisionDetected = collisionData isnt false
 
                     if collisionDetected

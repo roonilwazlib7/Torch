@@ -34,6 +34,7 @@ class CanvasGame
         @Factory = new GameThingFactory(@)
         @State = new StateMachine(@)
         @GamePads = new GamePadManager(@)
+        @Cast = new CastManager(@)
 
         @deltaTime = 0
         @fps = 0

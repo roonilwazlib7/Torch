@@ -13,7 +13,6 @@ class Animation extends Trashable
         @loop = true
         return @
 
-
 class AnimationManager
     animations: null
     constructor: (@sprite) ->
