@@ -87,7 +87,7 @@ class exports.Player extends Torch.Sprite
 
         v.SubtractVector( m )
         v.Normalize()
-        @rotation = -v.angle
+        @rotation = v.angle - Math.PI/2
 
         v.MultiplyScalar( -1 * @bulletVelocity )
         @bulletVector = v

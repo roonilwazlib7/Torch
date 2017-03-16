@@ -13,6 +13,13 @@ class MathUtility
 
         return 0
 
+    # returns radian plus delta angles in radians
+    Radian: (n, delta) ->
+        return {
+            Rad: n + delta
+            Deg: n + delta / ( Math.PI / 180 )
+        }
+
 class RandomPool
     choices: null
     constructor: ->

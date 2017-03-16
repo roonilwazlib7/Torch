@@ -1,15 +1,15 @@
 class CanvasRenderer
     constructor: (@sprite) ->
         @game = @sprite.game
-        @previousPosition = new Point(@sprite.position.x, @sprite.position.y)
+        @previousPosition = new Vector(@sprite.position.x, @sprite.position.y)
     Draw: ->
         drawRec = new Rectangle(@sprite.position.x, @sprite.position.y, @sprite.rectangle.width, @sprite.rectangle.height)
 
         drawRec.x = ( @sprite.position.x - @previousPosition.x ) * @game.Loop.lagOffset + @previousPosition.x
         drawRec.y = ( @sprite.position.y - @previousPosition.y ) * @game.Loop.lagOffset + @previousPosition.y
-        @previousPosition = new Point(@sprite.position.x, @sprite.position.y)
+        @previousPosition = new Vector(@sprite.position.x, @sprite.position.y)
 
-        cameraTransform = new Point(0,0)
+        cameraTransform = new Vector(0,0)
 
         if not @sprite.fixed
             drawRec.x += @game.Camera.position.x + @game.Hooks.positionTransform.x

@@ -18,7 +18,7 @@ class GridManager
     margin: null
 
     constructor: (@sprite) ->
-        @position = new Point(0,0)
+        @position = new Vector(0,0)
         @children = []
         @margin =
             left: 0

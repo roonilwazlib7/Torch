@@ -442,6 +442,13 @@ class MathUtility
 
         return 0
 
+    # returns radian plus delta angles in radians
+    Radian: (n, delta) ->
+        return {
+            Rad: n + delta
+            Deg: n + delta / ( Math.PI / 180 )
+        }
+
 class RandomPool
     choices: null
     constructor: ->
@@ -1710,6 +1717,7 @@ class SizeManager
         rect.width = @width * @scale.width
         rect.height = @height * @scale.height
 
+SpriteQuery = Util.Enum("RayCast", "CircleCast", "PolygonCast", "RectangleCast")
 class EventManager
     mouseOver: false
     clickTrigger: false
@@ -1719,6 +1727,9 @@ class EventManager
 
     constructor: (@sprite) ->
         @game = @sprite.game
+
+        @game.On "SpriteQuery", (event) =>
+            @HandleQuery( event )
 
     Update: ->
         if not @game.Mouse.GetRectangle().Intersects(@sprite.rectangle) and @mouseOver
@@ -1767,6 +1778,25 @@ class EventManager
 
         else if @game.Mouse.down and not @mouseOver
             @clickAwayTrigger = true
+
+    HandleQuery: (event) ->
+        res = null
+        switch event.query
+
+            when SpriteQuery.RayCast
+                res = @sprite.Collisions.RayCast(event.ray, event.limit )
+
+            when SpriteQuery.CircleCast
+                res = @sprite.Collisions.CircleCast(event.circle, event.limit )
+
+            when SpriteQuery.PolygonCast
+                res = @sprite.Collisions.PolygonCast(event.polygon, event.limit )
+
+            when SpriteQuery.RectangleCast
+                res = @sprite.Collisions.RectangleCast(event.rectangle, event.limit )
+
+        if res? and res.collided
+            event.results.push( res )
 
 class EffectManager
     tint: null
@@ -1913,7 +1943,7 @@ class GridManager
     margin: null
 
     constructor: (@sprite) ->
-        @position = new Point(0,0)
+        @position = new Vector(0,0)
         @children = []
         @margin =
             left: 0
@@ -2045,7 +2075,6 @@ class Animation extends Trashable
     Loop: ->
         @loop = true
         return @
-
 
 class AnimationManager
     animations: null
@@ -2226,15 +2255,15 @@ class BindManager
 class CanvasRenderer
     constructor: (@sprite) ->
         @game = @sprite.game
-        @previousPosition = new Point(@sprite.position.x, @sprite.position.y)
+        @previousPosition = new Vector(@sprite.position.x, @sprite.position.y)
     Draw: ->
         drawRec = new Rectangle(@sprite.position.x, @sprite.position.y, @sprite.rectangle.width, @sprite.rectangle.height)
 
         drawRec.x = ( @sprite.position.x - @previousPosition.x ) * @game.Loop.lagOffset + @previousPosition.x
         drawRec.y = ( @sprite.position.y - @previousPosition.y ) * @game.Loop.lagOffset + @previousPosition.y
-        @previousPosition = new Point(@sprite.position.x, @sprite.position.y)
+        @previousPosition = new Vector(@sprite.position.x, @sprite.position.y)
 
-        cameraTransform = new Point(0,0)
+        cameraTransform = new Vector(0,0)
 
         if not @sprite.fixed
             drawRec.x += @game.Camera.position.x + @game.Hooks.positionTransform.x
@@ -2389,6 +2418,140 @@ class CloneManager
 
     WithGame: (keepGame = false) ->
         return @_defaultClone(keepGame)
+
+Collision =
+    AABB: 1
+    Circle: 2
+    SAT: 3
+
+class CollisionDetector
+    AABB: (sprite, otherSprite)->
+        return sprite.rectangle.Intersects(otherSprite.rectangle)
+
+    Circle: ->
+
+    SAT: ->
+
+class CollisionManager
+    mode: Collision.AABB
+    sprite: null
+    filter: null
+    limit: null
+    enabled: false
+
+    constructor: (@sprite) ->
+        @filter = {}
+        @game = @sprite.game
+        @collisionDetector = new CollisionDetector()
+
+    Monitor: ->
+        @enabled = true
+
+    NotFiltered: (sprite) ->
+        # evaluate the sprite to see if it is filtered out
+        # by comparing its attributes with filter objects
+
+        # check game-wide filters
+        for key,value of @game.filter
+            # check special flag
+            if key is "__type__"
+                return false if value.constructor.name is sprite.constructor.name
+            else
+                return false if value is sprite[key]
+
+        # check sprite-specific filters
+        for key,value of @filter
+            # check special flag
+            if key is "__type__"
+                return false if value.constructor.name is sprite.constructor.name
+            else
+                return false if value is sprite[key]
+
+        return true
+
+    InLimit: (sprite) ->
+        # evaluate sprite to make sure it has attributes
+        # that match limit object
+
+        # check sprite-specific limits
+        for key,value of @limit
+            # check special flag
+            if key is "__type__"
+                return true if value.constructor.name is sprite.constructor.name
+            else
+                return true if value is sprite[key]
+
+        return false
+
+    Valid: (sprite) ->
+        if @limit isnt null
+            return @InLimit(sprite)
+
+        return @NotFiltered(sprite)
+
+    Filter: (_filter) ->
+        @filter = _filter
+
+    Limit: (_limit) ->
+        @limit = _limit
+
+    Mode: (_mode) ->
+        mode = _mode
+
+    Update: ->
+        return if not @sprite.game or not @enabled
+        @game = @sprite.game
+        anyCollisions = false
+
+        for otherSprite in @game.things
+            if otherSprite.torch_type is "Sprite"
+                if @sprite.NotSelf(otherSprite) and @Valid(otherSprite)
+                    collisionDetected = false
+                    collisionData = {}
+                    switch @mode
+                        when Collision.AABB
+                            collisionData = @collisionDetector.AABB( @sprite, otherSprite )
+                            collisionDetected = collisionData isnt false
+
+                    if collisionDetected
+                        collisionData.self = @sprite
+                        collisionData.collider = otherSprite
+                        anyCollisions == true
+                        @sprite.Emit("Collision", new Torch.Event(@game, {collisionData: collisionData}))
+
+        @sprite.Emit("NoCollision", new Torch.Event(@game, {}))
+
+    SimpleCollisionHandle: (event, sink = 1) ->
+        offset = event.collisionData
+        touching = {left: false, right: false, top: false, bottom: false}
+        if offset.vx < offset.halfWidths and offset.vy < offset.halfHeights
+            if offset.x < offset.y
+
+                if offset.vx > 0
+                    event.collisionData.self.position.x += offset.x * sink
+                    touching.left = true
+                    #colDir = "l"
+                else if offset.vx < 0
+                    #colDir = "r"
+                    event.collisionData.self.position.x -= offset.x * sink
+                    touching.right = true
+
+            else if offset.x > offset.y
+
+                if offset.vy > 0
+                    #colDir = "t"
+                    event.collisionData.self.position.y += offset.y * sink
+                    touching.top = true
+
+                else if  offset.vy < 0
+                    #colDir = "b"
+                    event.collisionData.self.position.y -= offset.y * sink
+                    touching.bottom = true
+
+        return touching
+
+    CastRay: ->
+        # ...
 
 TorchModule class Sprite extends GameThing
     Sprite.MixIn(EventDispatcher)
@@ -2762,173 +2925,6 @@ TorchModule class SpriteGroup extends GameThing
                 j++
 
             i++
-
-class CollisionDetector
-    constructor: (@sprite, @otherSprite) ->
-
-    AABB: ->
-        return new AABB(@sprite, @otherSprite).Execute()
-
-    Circle: ->
-        return new Circle(@sprite, @otherSprite).Execute()
-
-    SAT: ->
-        return new SAT(@sprite, @otherSprite).Execute()
-
-class AABB
-    constructor: (@sprite, @otherSprite) ->
-
-    Execute: ->
-        return @sprite.rectangle.Intersects(@otherSprite.rectangle)
-
-class Circle
-    constructor: (@sprite, @otherSprite) ->
-
-    Execute: ->
-        circle1 =
-            radius: @sprite.Width()
-            x: @sprite.Position("x")
-            y: @sprite.Position("y")
-
-        circle2 =
-            radius: @otherSprite.Width()
-            x: @otherSprite.Position("x")
-            y: @otherSprite.Position("y")
-
-        dx = circle1.x - circle2.x
-        dy = circle1.y - circle2.y
-        distance = Math.sqrt(dx * dx + dy * dy)
-
-        if distance < circle1.radius + circle2.radius
-            #collision detected!
-            return true
-        return false
-
-
-Collision =
-    AABB: 1
-    Circle: 2
-    SAT: 3
-
-class CollisionManager
-    mode: Collision.AABB
-    sprite: null
-    filter: null
-    limit: null
-    enabled: false
-
-    constructor: (@sprite) ->
-        @filter = {}
-        @game = @sprite.game
-
-    Monitor: ->
-        @enabled = true
-
-    NotFiltered: (sprite) ->
-        # evaluate the sprite to see if it is filtered out
-        # by comparing its attributes with filter objects
-
-        # check game-wide filters
-        for key,value of @game.filter
-            # check special flag
-            if key is "__type__"
-                return false if value.constructor.name is sprite.constructor.name
-            else
-                return false if value is sprite[key]
-
-        # check sprite-specific filters
-        for key,value of @filter
-            # check special flag
-            if key is "__type__"
-                return false if value.constructor.name is sprite.constructor.name
-            else
-                return false if value is sprite[key]
-
-        return true
-
-    InLimit: (sprite) ->
-        # evaluate sprite to make sure it has attributes
-        # that match limit object
-
-        # check sprite-specific limits
-        for key,value of @limit
-            # check special flag
-            if key is "__type__"
-                return true if value.constructor.name is sprite.constructor.name
-            else
-                return true if value is sprite[key]
-
-        return false
-
-    Valid: (sprite) ->
-        if @limit isnt null
-            return @InLimit(sprite)
-
-        return @NotFiltered(sprite)
-
-    Filter: (_filter) ->
-        @filter = _filter
-
-    Limit: (_limit) ->
-        @limit = _limit
-
-    Mode: (_mode) ->
-        mode = _mode
-
-    Update: ->
-        return if not @sprite.game or not @enabled
-        @game = @sprite.game
-        anyCollisions = false
-
-        for otherSprite in @game.things
-            if otherSprite.torch_type is "Sprite"
-                if @sprite.NotSelf(otherSprite) and @Valid(otherSprite)
-                    collisionDetected = false
-                    collisionData = {}
-                    switch @mode
-                        when Collision.AABB
-                            collisionData = @sprite.CollidesWith(otherSprite).AABB()
-                            collisionDetected = collisionData isnt false
-
-                    if collisionDetected
-                        collisionData.self = @sprite
-                        collisionData.collider = otherSprite
-                        anyCollisions == true
-                        @sprite.Emit("Collision", new Torch.Event(@game, {collisionData: collisionData}))
-
-        @sprite.Emit("NoCollision", new Torch.Event(@game, {}))
-
-    SimpleCollisionHandle: (event, sink = 1) ->
-        offset = event.collisionData
-        touching = {left: false, right: false, top: false, bottom: false}
-        if offset.vx < offset.halfWidths and offset.vy < offset.halfHeights
-            if offset.x < offset.y
-
-                if offset.vx > 0
-                    event.collisionData.self.position.x += offset.x * sink
-                    touching.left = true
-                    #colDir = "l"
-                else if offset.vx < 0
-                    #colDir = "r"
-                    event.collisionData.self.position.x -= offset.x * sink
-                    touching.right = true
-
-            else if offset.x > offset.y
-
-                if offset.vy > 0
-                    #colDir = "t"
-                    event.collisionData.self.position.y += offset.y * sink
-                    touching.top = true
-
-                else if  offset.vy < 0
-                    #colDir = "b"
-                    event.collisionData.self.position.y -= offset.y * sink
-                    touching.bottom = true
-
-        return touching
-
-    CastRay: ->
-        # ...
 
 class Loop
     constructor: (@game) ->
@@ -3751,10 +3747,7 @@ class AudioPlayer
         source.start(time)
 
 class HookManager
-    positionTransform: null
-
-    constructor: (@game) ->
-        @positionTransform = new Point(0,0)
+    positionTransform: {x: 0, y: 0}
 
 class GameThingFactory
     game: null
@@ -3911,6 +3904,53 @@ class GamePadStick
         else
             @verticalAxis = 0
 
+class CastManager
+    constructor: (@game) ->
+
+    Ray: (startPoint, endPoint, limit = false) ->
+        results = []
+
+        @Emit "SpriteQuery", new Event @,
+            query: SpriteQuery.RayCast
+            ray: new Line( startPoint, endPoint )
+            results: results
+            limit: limit
+
+        return results
+
+    Circle: (x, y, radius, limit = false) ->
+        results = []
+
+        @Emit "SpriteQuery", new Event @,
+            query: SpriteQuery.CircleCast
+            circle: new Circle( x, y, radius )
+            results: results
+            limit: limit
+
+        return results
+
+    Polygon: (points, limit = false) ->
+        results = []
+
+        @Emit "SpriteQuery", new Event @,
+            query: SpriteQuery.PolygonCast
+            polygon: new Polygon( points )
+            results: results
+            limit: limit
+
+        return results
+
+    Rectangle: (x, y, width, height, limit = false) ->
+        results = []
+
+        @Emit "SpriteQuery", new Event @,
+            query: SpriteQuery.RectangleCast
+            rectangle: new Rectangle( x, y, width, height )
+            results: results
+            limit: limit
+
+        return results
+
 class CanvasGame
     torch_type: "Game"
     constructor: (@canvasId, @width, @height, @name, @graphicsType, @pixel = 0) ->
@@ -3947,6 +3987,7 @@ class CanvasGame
         @Factory = new GameThingFactory(@)
         @State = new StateMachine(@)
         @GamePads = new GamePadManager(@)
+        @Cast = new CastManager(@)
 
         @deltaTime = 0
         @fps = 0
@@ -4606,4 +4647,4 @@ class Torch
 exports.Torch = new Torch()
 
 
-Torch::version = '0.9.194'
+Torch::version = '0.9.217'

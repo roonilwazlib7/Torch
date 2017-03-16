@@ -111,8 +111,8 @@ class exports.ShooterEnemy extends exports.Enemy
         p = @position.Clone()
         p.SubtractVector( @GetObjectToOrbit().position )
 
-        angle = p.angle - Math.PI
-        @rotation = -angle
+        angle = -p.angle + Math.PI/2
+        @rotation = angle
 
     GetObjectToOrbit: ->
         return @game.motherShip
