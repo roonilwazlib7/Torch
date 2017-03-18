@@ -1,7 +1,11 @@
 Torch.StrictErrors()
 Torch.DumpErrors()
+Torch.Imports()
 
-openSpace = new Torch.Game("container", "fill", "fill", "OpenSpace", Torch.CANVAS)
+Import "Rectangle"
+Import "Game"
+
+openSpace = new Game("container", "fill", "fill", "OpenSpace", Torch.CANVAS)
 
 Load = (game) ->
     Player.Load(game)

@@ -76,4 +76,22 @@ class Torch
     DumpErrors: ->
         @DUMP_ERRORS = true
 
+    ImportMath: ->
+        m = Math
+
+        m.D90 = Math.PI / 2
+        m.D45 = Math.PI / 4
+
+    Imports: ->
+        return if exports[ "Import" ]
+        exports[ "Import" ] = (moduleName, alias) =>
+
+            if not alias?
+                return if exports[ moduleName ]?
+                exports[ moduleName ] = @[ moduleName ]
+            else
+                return if exports[ alias ]?
+                exports[ alias ] = @[ moduleName ]
+
+
 exports.Torch = new Torch()

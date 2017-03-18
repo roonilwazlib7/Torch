@@ -1,0 +1,14 @@
+bundle: false
+compress: false
+run: true
+electron: true
+
+coffeeSources: [
+]
+
+files:
+    [
+        "torch.js"
+        "Core/Ship.js"
+        "Core/Game.js"
+    ]

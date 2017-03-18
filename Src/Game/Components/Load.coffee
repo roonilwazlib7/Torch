@@ -3,6 +3,9 @@ LoadType = Util.Enum("Texture", "Audio", "Video", "File", "TextureAtlas")
 class LoadJob
     constructor: (@loadType, @id, @path) ->
 
+class PathShortCut
+    constructor: (@shortCut, @path) ->
+
 class Load
     # TODO:
     # Warn when assets are overwritten
@@ -19,6 +22,7 @@ class Load
         @textureAtlases = @game.Assets.textureAtlases
 
         @loadJobs = []
+        @pathShortCuts = []
 
         @itemsLeftToLoad = 0
         @progress = 0
@@ -27,20 +31,34 @@ class Load
 
         @loadLog = ""
 
+    DefinePathShortCut: (shortCut, path) ->
+        @pathShortCuts.push( new PathShortCut(shortCut, path) )
+        return @
+
+    ResolvePath: (path) ->
+        for shortCut in @pathShortCuts
+            path = path.replace(shortCut.shortCut, shortCut.path)
+        return path
+
     Audio: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.Audio, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.Audio, id, @ResolvePath(path)) )
+        return @
 
     Texture: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.Texture, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.Texture, id, @ResolvePath(path)) )
+        return @
 
     TextureAtlas: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.TextureAtlas, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.TextureAtlas, id, @ResolvePath(path)) )
+        return @
 
     Video: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.Video, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.Video, id, @ResolvePath(path)) )
+        return @
 
     File: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.File, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.File, id, @ResolvePath(path)) )
+        return @
 
     Font: (path, name) ->
         # this can be done right off the bat
@@ -63,6 +81,7 @@ class Load
         document.body.appendChild(manualLoader)
 
         #manualLoader.parentNode.removeChild(manualLoader)
+        return @
 
     LoadItemFinished: ->
         @itemsLeftToLoad -= 1

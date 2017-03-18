@@ -1,5 +1,9 @@
 exports = this
-class exports.Player extends Torch.Sprite
+Torch.Imports()
+
+Import "Sprite"
+
+class exports.Player extends Sprite
     velocity: 0.4
     bulletFireDelay: 100
     bulletFiredAt: 0

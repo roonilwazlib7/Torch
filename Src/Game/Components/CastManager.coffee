@@ -1,3 +1,8 @@
+class SpriteQueryResult
+    valid: false
+    constructor: ->
+        @results = []
+
 class CastManager
     constructor: (@game) ->
 
@@ -37,10 +42,13 @@ class CastManager
     Rectangle: (x, y, width, height, limit = false) ->
         results = []
 
-        @Emit "SpriteQuery", new Event @,
-            query: SpriteQuery.RectangleCast
-            rectangle: new Rectangle( x, y, width, height )
+        @game.Emit "SpriteQuery", new Event @,
+            args: [ new Rectangle( x, y, width, height ) ]
             results: results
             limit: limit
+            query: (sprite, rectangle) ->
+                result = new SpriteQueryResult()
+                result.valid = sprite.rectangle.Intersects(rectangle)
+                return result
 
         return results

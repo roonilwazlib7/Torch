@@ -7,6 +7,7 @@ class BodyManager
         @alpha = 0
         @distance = 0
         @orbit = null
+        @rotateToVelocityOffset = null
 
     Update: ->
         dX = @velocity.x * @game.Loop.updateDelta
@@ -24,6 +25,9 @@ class BodyManager
 
         if @orbit?
             @orbit.Update()
+
+        if @rotateToVelocityOffset?
+            @sprite.rotation = @velocity.angle + @rotateToVelocityOffset
 
 
     Orbit: (spriteToOrbit, speed, length) ->
@@ -51,6 +55,9 @@ class BodyManager
         vec = new Vector( (otherSprite.position.x - @sprite.position.x), (otherSprite.position.y - @sprite.position.y) )
         vec.Normalize()
         return vec
+
+    RotateToVelocity: (offset = 0) ->
+        @rotateToVelocityOffset = offset
 
 class Orbit
     sprite: null

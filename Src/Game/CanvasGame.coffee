@@ -160,6 +160,7 @@ class CanvasGame
 
                 if thing.Emit?
                     thing.Emit "Trash", new Torch.Event(@)
+                    thing.Off()
 
         @things = filtered
         @things = @things.concat( @AddStack )

@@ -1616,6 +1616,7 @@ class BodyManager
         @alpha = 0
         @distance = 0
         @orbit = null
+        @rotateToVelocityOffset = null
 
     Update: ->
         dX = @velocity.x * @game.Loop.updateDelta
@@ -1633,6 +1634,9 @@ class BodyManager
 
         if @orbit?
             @orbit.Update()
+
+        if @rotateToVelocityOffset?
+            @sprite.rotation = @velocity.angle + @rotateToVelocityOffset
 
 
     Orbit: (spriteToOrbit, speed, length) ->
@@ -1660,6 +1664,9 @@ class BodyManager
         vec = new Vector( (otherSprite.position.x - @sprite.position.x), (otherSprite.position.y - @sprite.position.y) )
         vec.Normalize()
         return vec
+
+    RotateToVelocity: (offset = 0) ->
+        @rotateToVelocityOffset = offset
 
 class Orbit
     sprite: null
@@ -1781,21 +1788,10 @@ class EventManager
 
     HandleQuery: (event) ->
         res = null
-        switch event.query
 
-            when SpriteQuery.RayCast
-                res = @sprite.Collisions.RayCast(event.ray, event.limit )
+        res = event.query( @sprite, event.args... )
 
-            when SpriteQuery.CircleCast
-                res = @sprite.Collisions.CircleCast(event.circle, event.limit )
-
-            when SpriteQuery.PolygonCast
-                res = @sprite.Collisions.PolygonCast(event.polygon, event.limit )
-
-            when SpriteQuery.RectangleCast
-                res = @sprite.Collisions.RectangleCast(event.rectangle, event.limit )
-
-        if res? and res.collided
+        if res? and res.valid
             event.results.push( res )
 
 class EffectManager
@@ -3010,6 +3006,9 @@ LoadType = Util.Enum("Texture", "Audio", "Video", "File", "TextureAtlas")
 class LoadJob
     constructor: (@loadType, @id, @path) ->
 
+class PathShortCut
+    constructor: (@shortCut, @path) ->
+
 class Load
     # TODO:
     # Warn when assets are overwritten
@@ -3026,6 +3025,7 @@ class Load
         @textureAtlases = @game.Assets.textureAtlases
 
         @loadJobs = []
+        @pathShortCuts = []
 
         @itemsLeftToLoad = 0
         @progress = 0
@@ -3034,20 +3034,34 @@ class Load
 
         @loadLog = ""
 
+    DefinePathShortCut: (shortCut, path) ->
+        @pathShortCuts.push( new PathShortCut(shortCut, path) )
+        return @
+
+    ResolvePath: (path) ->
+        for shortCut in @pathShortCuts
+            path = path.replace(shortCut.shortCut, shortCut.path)
+        return path
+
     Audio: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.Audio, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.Audio, id, @ResolvePath(path)) )
+        return @
 
     Texture: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.Texture, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.Texture, id, @ResolvePath(path)) )
+        return @
 
     TextureAtlas: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.TextureAtlas, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.TextureAtlas, id, @ResolvePath(path)) )
+        return @
 
     Video: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.Video, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.Video, id, @ResolvePath(path)) )
+        return @
 
     File: (path, id) ->
-        @loadJobs.push( new LoadJob(LoadType.File, id, path) )
+        @loadJobs.push( new LoadJob(LoadType.File, id, @ResolvePath(path)) )
+        return @
 
     Font: (path, name) ->
         # this can be done right off the bat
@@ -3070,6 +3084,7 @@ class Load
         document.body.appendChild(manualLoader)
 
         #manualLoader.parentNode.removeChild(manualLoader)
+        return @
 
     LoadItemFinished: ->
         @itemsLeftToLoad -= 1
@@ -3904,6 +3919,11 @@ class GamePadStick
         else
             @verticalAxis = 0
 
+class SpriteQueryResult
+    valid: false
+    constructor: ->
+        @results = []
+
 class CastManager
     constructor: (@game) ->
 
@@ -3943,11 +3963,14 @@ class CastManager
     Rectangle: (x, y, width, height, limit = false) ->
         results = []
 
-        @Emit "SpriteQuery", new Event @,
-            query: SpriteQuery.RectangleCast
-            rectangle: new Rectangle( x, y, width, height )
+        @game.Emit "SpriteQuery", new Event @,
+            args: [ new Rectangle( x, y, width, height ) ]
             results: results
             limit: limit
+            query: (sprite, rectangle) ->
+                result = new SpriteQueryResult()
+                result.valid = sprite.rectangle.Intersects(rectangle)
+                return result
 
         return results
 
@@ -4113,6 +4136,7 @@ class CanvasGame
 
                 if thing.Emit?
                     thing.Emit "Trash", new Torch.Event(@)
+                    thing.Off()
 
         @things = filtered
         @things = @things.concat( @AddStack )
@@ -4644,7 +4668,25 @@ class Torch
     DumpErrors: ->
         @DUMP_ERRORS = true
 
+    ImportMath: ->
+        m = Math
+
+        m.D90 = Math.PI / 2
+        m.D45 = Math.PI / 4
+
+    Imports: ->
+        return if exports[ "Import" ]
+        exports[ "Import" ] = (moduleName, alias) =>
+
+            if not alias?
+                return if exports[ moduleName ]?
+                exports[ moduleName ] = @[ moduleName ]
+            else
+                return if exports[ alias ]?
+                exports[ alias ] = @[ moduleName ]
+
+
 exports.Torch = new Torch()
 
 
-Torch::version = '0.9.217'
+Torch::version = '0.9.251'

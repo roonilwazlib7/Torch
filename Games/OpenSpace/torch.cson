@@ -1,6 +1,6 @@
 bundle: false
 compress: false
-run: true
+run: false
 electron: true
 
 coffeeSources: [

@@ -62,19 +62,8 @@ class EventManager
 
     HandleQuery: (event) ->
         res = null
-        switch event.query
 
-            when SpriteQuery.RayCast
-                res = @sprite.Collisions.RayCast(event.ray, event.limit )
+        res = event.query( @sprite, event.args... )
 
-            when SpriteQuery.CircleCast
-                res = @sprite.Collisions.CircleCast(event.circle, event.limit )
-
-            when SpriteQuery.PolygonCast
-                res = @sprite.Collisions.PolygonCast(event.polygon, event.limit )
-
-            when SpriteQuery.RectangleCast
-                res = @sprite.Collisions.RectangleCast(event.rectangle, event.limit )
-
-        if res? and res.collided
+        if res? and res.valid
             event.results.push( res )
